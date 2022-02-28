@@ -12,51 +12,39 @@ let score =0;
 let questionCounter =0;
 let availableQuestions = [];
 
-let questions = [
-    {
-        question: "Inside which HTML element do we put the JavaScript??",
-        choice1: "<script>",
-        choice2: "<javascript>",
-        choice3: "<js>",
-        choice4: "<scripting>",
+let questions = [];
+fetch(
+    'https://opentdb.com/api.php?amount=10&category=9&difficulty=easy&type=multiple'
+)
+    .then((res) => {
+        return res.json();
+    })
+    .then((loadedQuestions) => {
+        questions = loadedQuestions.results.map((loadedQuestion) => {
+            const formattedQuestion = {
+                question: loadedQuestion.question,
+            };
 
-        answer: 1
-    },
-    
-    {
-        question: "Inside which HTML element do we put the JavaScript??",
-        choice1: "<script>",
-        choice2: "<java>",
-        choice3: "<js>",
-        choice4: "<scripting>",
+            const answerChoices = [...loadedQuestion.incorrect_answers];
+            formattedQuestion.answer = Math.floor(Math.random() * 4) + 1;
+            answerChoices.splice(
+                formattedQuestion.answer - 1,
+                0,
+                loadedQuestion.correct_answer
+            );
 
-        answer: 2
-    },
+            answerChoices.forEach((choice, index) => {
+                formattedQuestion['choice' + (index + 1)] = choice;
+            });
 
-    {
-        question: "Inside which HTML element do we put the JavaScript??",
-        choice1: "<python>",
-        choice2: "<javascript>",
-        choice3: "<css>",
-        choice4: "<html>",
+            return formattedQuestion;
+        });
 
-        answer:3
-    },
-
-    {
-        question: "Inside which HTML element do we put the JavaScript??",
-        choice1: "<os>",
-        choice2: "<driver>",
-        choice3: "<kernel>",
-        choice4: "<linux>",
-
-        answer: 4
-    }
-
-   
-];
-
-
+        startGame();
+    })
+    .catch((err) => {
+        console.error(err);
+    });
 const CORRECT_BONUS = 10;
 const MAX_QUESTIONS =3;
 
@@ -70,7 +58,8 @@ startGame = () => {
 
 getNewQuestion = () => {
     if (availableQuestions.length == 0 || questionCounter >= MAX_QUESTIONS){
-        // go to the end page
+        localStorage.setItem("mostRecentScore",score);
+                // go to the end page
         return window.location.assign("/end.html");
     }
 
@@ -130,4 +119,3 @@ incrementScore =num => {
 
 };
 
-startGame();
